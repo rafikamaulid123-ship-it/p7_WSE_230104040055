@@ -1,80 +1,28 @@
-# P7 - Hardening Web Service (Movies API)
+# Laporan Praktikum #7 - API Hardening (Security & Observability)
 
-Project ini adalah hasil praktikum Web Service Engineering Minggu ke-7. Fokus utama project ini adalah meningkatkan keamanan (*hardening*), observabilitas (*logging*), dan manajemen error pada RESTful API Movies yang telah dibuat sebelumnya.
+**Nama**: Febi Novia Putri 
+**NIM**: 230104040055
 
-## 🚀 Fitur Utama
+## Deskripsi
+Project ini adalah pengembangan dari sistem Task Management (UTS) yang telah ditingkatkan keamanannya menggunakan teknik Hardening.
 
-Project ini telah dilengkapi dengan *middleware* dan konfigurasi standar industri:
+## Fitur Keamanan & Monitoring (Hardening)
+1.  **Helmet**: Melindungi HTTP Headers dari serangan umum.
+2.  **CORS**: Mengatur izin akses resource antar domain.
+3.  **Rate Limit**: Membatasi request (Max 100/15menit) untuk mencegah DDoS.
+4.  **Morgan**: Logging setiap aktivitas request ke terminal.
+5.  **Environment Variable**: Konfigurasi PORT dan sensitif data via `.env`.
+6.  **Health Check**: Endpoint `/api/health` untuk monitoring uptime server.
 
-### 1. Keamanan (Security)
-* **Helmet:** Mengamankan HTTP Headers dari kerentanan umum.
-* **CORS:** Membatasi akses resource hanya dari domain yang diizinkan (Origin Restriction).
-* **Rate Limiting:** Mencegah serangan *Brute Force* dan *DDoS* dengan membatasi jumlah request per IP (Max 100 request/15 menit).
+## Cara Menjalankan
+1.  Install dependencies: `npm install`
+2.  Buat file `.env` (lihat `.env.example`).
+3.  Jalankan: `npm run dev`
 
-### 2. Observabilitas (Logging)
-* **Morgan:** Mencatat log setiap request yang masuk (Method, URL, Status, Response Time) ke console untuk memudahkan debugging.
-* **Health Check Endpoint:** Endpoint khusus (`/api/health`) untuk memantau status *uptime* server.
-
-### 3. Arsitektur & Error Handling
-* **Global Error Handler:** Menangkap semua error sistem dan menampilkannya dalam format JSON yang rapi dan konsisten.
-* **Environment Variables:** Konfigurasi sensitif (Port, Limit, Origin) dipisah menggunakan file `.env`.
-* **Modular Code:** Pemisahan *routes*, *controllers*, dan *middlewares* di dalam folder `src/`.
-
----
-
-## 🛠️ Instalasi & Cara Menjalankan
-
-Ikuti langkah berikut untuk menjalankan project di lokal:
-
-1.  **Clone Repository** (atau ekstrak folder project)
-2.  **Install Dependencies**
-    ```bash
-    npm install
-    ```
-3.  **Konfigurasi Environment**
-    Buat file `.env` di root folder, lalu salin konfigurasi berikut:
-    ```env
-    PORT=3000
-    NODE_ENV=development
-    RATE_LIMIT_WINDOW_MS=900000
-    RATE_LIMIT_MAX=100
-    ALLOWED_ORIGIN=http://localhost:5173
-    ```
-4.  **Jalankan Server**
-    ```bash
-    npm start
-    ```
-    Output sukses: `✅ Server is running securely on port 3000`
-
----
-
-## 🔌 API Endpoints
-
-Berikut adalah daftar endpoint yang tersedia:
-
-| Method | Endpoint | Deskripsi | Status Code |
-| :--- | :--- | :--- | :--- |
-| **GET** | `/api/health` | Cek status server (Health Check) | 200 |
-| **GET** | `/api/movies` | Mendapatkan semua data film | 200 |
-| **GET** | `/api/movies/:id` | Mendapatkan detail film by ID | 200 / 404 |
-| **POST** | `/api/movies` | Menambah data film baru | 201 / 400 |
-| **PUT** | `/api/movies/:id` | Mengupdate data film | 200 / 404 |
-| **DELETE** | `/api/movies/:id` | Menghapus data film | 204 / 404 |
-| **ANY** | `/api/ngawur` | Test 404 Handler | 404 |
-
----
-
-## 📂 Struktur Folder
-
-Struktur project disusun secara modular di dalam folder `src`:
-
-P7-Hardening-NIM/ 
-├── src/ │ 
-            ├── controllers/ # Logika Bisnis │ 
-            ├── middlewares/ # Error Handler, Logger, Limiter │ 
-            ├── routes/ # Definisi URL/Endpoint │ 
-            ├── data/ # Mock Data Movies │ 
-            └── app.js # Entry Point Server 
-├── .env # Konfigurasi Environment 
-├── .env.example # Contoh Konfigurasi 
-└── package.json
+## Daftar Endpoint
+| Method | Endpoint | Deskripsi |
+| :--- | :--- | :--- |
+| GET | /api/tasks | Get all tasks |
+| POST | /api/tasks | Create task |
+| GET | /api/health | Server Health Check |
+| GET | /api/info | Service Info |
