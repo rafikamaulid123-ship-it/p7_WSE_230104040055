@@ -1,84 +1,69 @@
-// =========================================
-// 1. IMPORTS & CONFIGURATION
-// =========================================
-require('dotenv').config(); // Load file .env [cite: 52]
+require('dotenv').config(); // 1. Load Env
 const express = require('express');
-const helmet = require('helmet');       // Security Headers [cite: 54]
-const cors = require('cors');           // Origin Restriction [cite: 55]
-const morgan = require('morgan');       // Logging [cite: 56]
-const rateLimit = require('express-rate-limit'); // Anti-Spam [cite: 57]
+const helmet = require('helmet');
+const cors = require('cors');
+const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
 
-// Import Routes & Middleware
-// PASTIKAN nama file route di bawah ini sesuai dengan file Anda
-const movieRoutes = require('./routes/movies.routes'); 
+const taskRoutes = require('./routes/tasks.routes');
 const errorHandler = require('./middlewares/errorHandler');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-// =========================================
-// 2. SECURITY & LOGGING MIDDLEWARES
-// =========================================
+// --- MIDDLEWARES (Urutan Penting!) ---
 
-// A. Helmet: Amankan Header HTTP
-app.use(helmet()); 
+// 2. Helmet: Amankan HTTP Headers (Sembunyikan info server, XSS protection, dll)
+app.use(helmet());
 
-// B. CORS: Izinkan akses hanya dari domain tertentu
-app.use(cors({
-    origin: process.env.ALLOWED_ORIGIN || '*', 
-    methods: ['GET', 'POST', 'PUT', 'DELETE']
-}));
+// 3. CORS: Batasi siapa yang bisa akses API (Cth: hanya localhost:5173)
+app.use(cors()); 
+// Jika mau ketat: app.use(cors({ origin: 'http://localhost:5173' }));
 
-// C. Logging: Catat request yang masuk
-app.use(morgan('combined')); 
-
-// D. Rate Limiter: Batasi jumlah request (Anti DDoS) [cite: 67-71]
+// 4. Rate Limiter: Batasi spam request
 const limiter = rateLimit({
-    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 menit
-    max: parseInt(process.env.RATE_LIMIT_MAX) || 100, // Limit request
-    message: {
-        status: "error",
-        message: "Terlalu banyak permintaan, silakan coba lagi nanti."
-    }
+    windowMs: 15 * 60 * 1000, // 15 menit
+    max: process.env.RATE_LIMIT_MAX || 100, // Maks 100 request
+    message: { status: "fail", message: "Terlalu banyak request, coba lagi nanti." }
 });
 app.use(limiter);
 
-// E. Body Parser (Agar bisa baca JSON)
+// 5. Morgan: Logging request ke terminal
+app.use(morgan("dev")); // atau "combined" untuk log lebih detail
+
+// 6. Parsing Body
 app.use(express.json());
 
-// =========================================
-// 3. ROUTES
-// =========================================
+// --- ROUTES ---
 
-// Endpoint Monitoring (Health Check) [cite: 77-79]
+// Route Utama (Tasks)
+app.use('/api/tasks', taskRoutes);
+
+// Endpoint Monitoring (Health Check) - Wajib ada di P7
 app.get('/api/health', (req, res) => {
-    res.status(200).json({ 
+    res.json({ 
         status: "ok", 
         timestamp: new Date().toISOString(),
-        service: "Movies API Service"
+        server: "Task Service Hardened"
     });
 });
 
-// Route Utama Movies
-app.use('/api/movies', movieRoutes);
-
-// =========================================
-// 4. ERROR HANDLING (Wajib Paling Bawah)
-// =========================================
-
-// Handler 404 (Jika route tidak ditemukan)
-app.use((req, res, next) => {
-    const error = new Error("Resource not found");
-    error.status = 404;
-    next(error); // Lempar ke global error handler
+// Endpoint Info Service
+app.get('/api/info', (req, res) => {
+    res.json({ 
+        serviceName: "Task Management API",
+        version: "1.0.0",
+        maintainedBy: "Mahasiswa WSE"
+    });
 });
 
-// Global Error Handler [cite: 82]
+// 404 Handler (Untuk route yang tidak dikenal)
+app.use((req, res) => {
+    res.status(404).json({ success: false, message: 'Route not found' });
+});
+
+// --- GLOBAL ERROR HANDLER ---
 app.use(errorHandler);
 
-// =========================================
-// 5. START SERVER
-// =========================================
-app.listen(PORT, () => {
-    console.log(`✅ Server is running securely on port ${PORT}`);
-});
+// --- SERVER START ---
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
